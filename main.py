@@ -9,9 +9,7 @@ def main():
     currRoster = g.rostDic['mariners']
     for player in currRoster:
         print(player, end=", ")
-    currPlayer = currRoster[0]
-    
-    currPlayer = currPlayer.split()
+    currPlayer = currRoster[0].split()
     g = bball.GUI(currPlayer[0], currPlayer[1])
     print(g.df.BA[('Season Totals', 'Last 365 days')])
     
