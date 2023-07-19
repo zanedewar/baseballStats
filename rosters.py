@@ -32,8 +32,44 @@ def getRosters():
                 ind2 = line[ind:].find('<')
                 rost.append(line[ind+1:(ind+ind2)])
         players.append(rost)
-        
     df = pd.DataFrame(data = players)
     df = df.T
     df.columns = baseball
+    return df
+def getRoster(graphics):
+    pages = []
+    players = []
+
+    
+    r = requests.get("http://mlb.com/" + graphics.currTeam.lower() + "/roster")
+    pages.append(r.text)
+
+    for roster in pages:
+        rost = []
+        for line in roster.split("\n"):
+            if "/player/" in line:
+                ind = line.find('>')
+                ind2 = line[ind:].find('<')
+                rost.append(line[ind+1:(ind+ind2)])
+        players.append(rost)
+    print(players)
+    for player1 in players:
+        for i, p in enumerate(player1):
+            print(i)
+            print(p)
+            graphics.rosterDF.loc[i, graphics.currTeam.lower()] = p
+            print(p)
+    #graphics.rosterDF.loc[1:24, graphics.currTeam.lower()] = players
+    #graphics.rosterDF = graphics.rosterDF.T
+    return graphics.rosterDF
+def init():
+    empty = []
+    for i in range(26):
+        empty1 = []
+        for j in range(30):
+            empty1.append("")
+        empty.append(empty1)
+        df = pd.DataFrame(empty)
+    df.columns = baseball
+    print(df)
     return df
