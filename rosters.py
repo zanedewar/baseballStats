@@ -11,10 +11,9 @@ import pandas as pd
 
 #Team codes
 
-baseball = ['angels','astros','athletics','bluejays','braves','brewers','cardinals','cubs','diamondbacks','dodgers',
+baseball = ['angels','astros','athletics','bluejays','braves','brewers','cardinals','cubs','dbacks','dodgers',
             'giants','guardians','mariners','marlins','mets','nationals','orioles','padres','phillies','pirates','rangers',
             'rays','redsox','reds','rockies','royals','tigers','twins','whitesox','yankees']
-#baseball = ['angels']
 
 def getRosters():
     pages = []
@@ -52,18 +51,17 @@ def getRoster(graphics):
                 ind2 = line[ind:].find('<')
                 rost.append(line[ind+1:(ind+ind2)])
         players.append(rost)
+
     print(players)
+
     for player1 in players:
         for i, p in enumerate(player1):
-            print(i)
-            print(p)
             graphics.rosterDF.loc[i, graphics.currTeam.lower()] = p
-            print(p)
-    #graphics.rosterDF.loc[1:24, graphics.currTeam.lower()] = players
-    #graphics.rosterDF = graphics.rosterDF.T
+    
     return graphics.rosterDF
 def init():
     empty = []
+    
     for i in range(26):
         empty1 = []
         for j in range(30):
