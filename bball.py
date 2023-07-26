@@ -28,6 +28,9 @@ class GUI:
         self.rosterDF = rosters.init()
         
         self.g = tkinter.Tk()
+        #self.g.eval('tk::PlaceWindow . center')
+        self.g.geometry("300x%d" % (self.g.winfo_screenheight() - 150))
+        GUI.center(self.g)
         self.currTeam = 'astros'
         self.roster = rosters.getRoster(self)
         
@@ -96,14 +99,18 @@ class GUI:
     
     def createGraphics(self):
         self.fields = {}
+        self.labels = []
         currIndex = batterIndex if self.currBatter else pitcherIndex
-        for f in currIndex:
-            self.fields[f] = tkinter.Text(self.g)
+        for i, f in enumerate(currIndex):
+            self.fields[f] = tkinter.Text(self.g, height=1, width=10)
+            self.labels.append(tkinter.Label(text="%s: " % currIndex[i]))
         
         currStats = self.stats2023 if self.statSetting2023 else self.statsCareer
         for i, field in enumerate(self.fields.values()):
-            field.pack()
+            self.labels[i].pack()
+            field.pack(fill=tkinter.Y, padx=5,pady=5)
             field.insert(tkinter.END, currStats[i])
+            field.tag_add("center","1.0",tkinter.END)
             field.config(state=tkinter.DISABLED)
             print(field)
             print(type(field))
@@ -137,7 +144,7 @@ class GUI:
             print(currStats[i])
             field.config(state=tkinter.NORMAL)
             field.delete('1.0', tkinter.END)
-            field.insert('1.0', currStats[i])
+            field.insert('1.0', currStats[i]) 
             field.config(state=tkinter.DISABLED)
         self.g.update()
 
@@ -149,6 +156,23 @@ class GUI:
         self.statsCareer = self.stats[1::2]
         self.df = pybaseball.get_splits(self.ID[0], pitching_splits=not(self.currBatter))
 
+    def center(win):
+        """
+        https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
+        centers a tkinter window
+        :param win: the main window or Toplevel window to center
+        """
+        win.update_idletasks()
+        width = win.winfo_width()
+        frm_width = win.winfo_rootx() - win.winfo_x()
+        win_width = width + 2 * frm_width
+        height = win.winfo_height()
+        titlebar_height = win.winfo_rooty() - win.winfo_y()
+        win_height = height + titlebar_height + frm_width
+        x = win.winfo_screenwidth() // 2 - win_width // 2
+        y = win.winfo_screenheight() // 2 - win_height // 2
+        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        win.deiconify()
         
 
 
