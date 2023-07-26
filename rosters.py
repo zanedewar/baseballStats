@@ -8,6 +8,9 @@
 
 import requests
 import pandas as pd
+from bs4 import BeautifulSoup as bs
+from requests_html import HTMLSession
+
 
 #Team codes
 
@@ -71,3 +74,38 @@ def init():
     df.columns = baseball
     print(df)
     return df
+
+def getData(self):
+    url = "https://www.baseball-reference.com/players/%s/%s.shtml" % (self.last.lower()[0], self.ID[0])
+    print(url)
+    r = requests.get(url)
+    
+    sesh = HTMLSession()
+    s = sesh.get(url)
+    s.html.render()
+    
+    html = s.content.decode("utf-8")
+    soup = bs(html, 'html.parser')
+    spans = soup.find_all("p")
+    
+    nums = []
+    for span in spans:
+        span = str(span)
+        ind = span.find(">")
+        end = span[ind:].find("<")
+        
+        span = span[ind+1:end+ind]
+        print("span: %s" % span)
+        if(checkNum(span)):
+            print("good")
+            nums.append(span)
+    print(nums)
+    sesh.close()
+    return nums
+    
+def checkNum(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

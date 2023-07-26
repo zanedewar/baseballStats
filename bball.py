@@ -3,14 +3,28 @@ import pybaseball
 import pandas
 import rosters
 from tkinter import ttk
+import statsapi
+#import graphics
+batterIndex = ["WAR", "AB", "H", "HR", "BA", "R", 
+               "RBI", "SB", "OBP", "SLG", "OPS", "OPS+"]
+
+pitcherIndex = ["WAR", "W", "L", "ERA", "G", 
+                "GS", "SV", "IP", "SO", "WHIP"]
 class GUI:
     def __init__(self, first, last):
         self.first = first
         self.last = last
         self.ID = GUI.getID(first, last)
+        self.fields = {}
         
         print("self.id[0]: %s" % self.ID[0])
-        self.df = pybaseball.get_splits(self.ID[0])
+        print("Hello4")
+        self.statSetting2023 = True
+        self.currBatter = True
+        self.genStats()
+        
+        print("Hello5")
+        #print(self.df.BA[('Season Totals', 'Last 365 days')])
         self.rosterDF = rosters.init()
         
         self.g = tkinter.Tk()
@@ -26,6 +40,8 @@ class GUI:
                         'tigers':self.rosterDF.tigers,'twins':self.rosterDF.twins,'whitesox': self.rosterDF.whitesox,'yankees': self.rosterDF.yankees}
         
         self.initGraphics()
+        self.createGraphics()
+        
         self.g.mainloop()
         print(self.rosterDF)
         
@@ -36,10 +52,9 @@ class GUI:
         self.currTeam = self.teamVar.get()
         self.roster = rosters.getRoster(self)
         
-        self.player.destroy()
-        self.label.destroy()
+        self.player['values'] = self.getPlayers()
+        self.g.update()
         
-        self.createPlayers()
         print(self.currTeam)
 
     def initGraphics(self):
@@ -48,15 +63,13 @@ class GUI:
         
         self.team = ttk.Combobox(self.g, textvariable = self.teamVar)
         self.team['state'] = 'readonly'
-
-        
         self.team['values'] = rosters.baseball
         
         label = ttk.Label(text="Team: ")
-        label.pack(fill=tkinter.X,padx=5,pady=5)
-        self.team.pack()
-        self.team.bind('<<ComboboxSelected>>', self.changeTeam)
+        label.pack(fill=tkinter.Y,padx=5,pady=5)
+        self.team.pack(fill=tkinter.Y)
         
+        self.team.bind('<<ComboboxSelected>>', self.changeTeam)
         self.createPlayers()
         self.player.pack()
         
@@ -70,20 +83,73 @@ class GUI:
         self.player = ttk.Combobox(self.g, textvariable = self.playerVar)
         self.player['state'] = 'readonly'
         
+        currPlayers = self.getPlayers()
+        print(currPlayers)
+        
+        self.player['values'] = currPlayers
+        self.label = ttk.Label(text="Player: ")
+        
+        self.label.pack(fill=tkinter.Y, padx=5,pady=5)
+        self.player.pack(fill=tkinter.Y)
+        self.player.bind('<<ComboboxSelected>>', self.changePlayer)
+        self.g.update()
+    
+    def createGraphics(self):
+        self.fields = {}
+        currIndex = batterIndex if self.currBatter else pitcherIndex
+        for f in currIndex:
+            self.fields[f] = tkinter.Text(self.g)
+        
+        currStats = self.stats2023 if self.statSetting2023 else self.statsCareer
+        for i, field in enumerate(self.fields.values()):
+            field.pack()
+            field.insert(tkinter.END, currStats[i])
+            field.config(state=tkinter.DISABLED)
+            print(field)
+            print(type(field))
+        print(len(self.fields.values()))
+        self.g.update()
+    
+    def getPlayers(self):
         currPlayers = []
         if(self.currTeam != ''):
             for p in self.rostDic[self.currTeam.lower()]:
                 print("p: %s" % p)
                 if type(p) == str:
                     currPlayers.append(p)
-        print(currPlayers)
-        
-        self.player['values'] = currPlayers
-        self.label = ttk.Label(text="Player: ")
-        
-        self.label.pack(fill=tkinter.X, padx=5,pady=5)
-        self.player.pack()
+        return currPlayers
+    
+    def changePlayer(self, *args):
+        currPlayer = self.playerVar.get().split()
+        if(currPlayer != ""):
+            self.first = currPlayer[0]
+            self.last = currPlayer[1]
+        '''print("CurrPlayer: %s" % currPlayer)
+        print(self.first, self.last, sep=" ")'''
+        self.ID = GUI.getID(self.first, self.last)
+        #print(self.ID[0])
+        self.genStats()
+        '''print(self.stats2023)
+        print(self.statsCareer)'''
+        currStats = self.stats2023 if self.statSetting2023 else self.statsCareer
+        #print("currStats: %s" % currStats)
+        for i, field in enumerate(self.fields.values()):
+            print(currStats[i])
+            field.config(state=tkinter.NORMAL)
+            field.delete('1.0', tkinter.END)
+            field.insert('1.0', currStats[i])
+            field.config(state=tkinter.DISABLED)
         self.g.update()
+
+    
+    def genStats(self):
+        self.stats = rosters.getData(self)
+        print("self.stats: %s" % self.stats)
+        self.stats2023 = self.stats[::2]
+        self.statsCareer = self.stats[1::2]
+        self.df = pybaseball.get_splits(self.ID[0], pitching_splits=not(self.currBatter))
+
+        
 
 
 print("hello")

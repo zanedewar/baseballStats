@@ -5,19 +5,16 @@ def main():
     print("hello1")
     
     name = getName()
+    print("Hello2")
     g = bball.GUI(name[0], name[1])
+    print("Hello3")
     
-    print(g.df.BA[('Season Totals', 'Last 365 days')])
     currRoster = g.rostDic['astros']
     
-    for player in currRoster:
-        print(player, end=", ")
-    currPlayer = currRoster[0].split()
     
-    g = bball.GUI(currPlayer[0], currPlayer[1])
-    print(g.df.BA[('Season Totals', 'Last 365 days')])
     
 def getName():
+    #return ("spencer strider").split()
     return ("ty france").split()
     return input("Type in the player's name: ").split()
 
