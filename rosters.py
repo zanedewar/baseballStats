@@ -76,10 +76,12 @@ def init():
     return df
 
 def getData(self):
+    
     url = "https://www.baseball-reference.com/players/%s/%s.shtml" % (self.last.lower()[0], self.ID[0])
     print(url)
     r = requests.get(url)
     
+    #Renders w/ JavaScript and then scrapes html to get stats
     sesh = HTMLSession()
     s = sesh.get(url)
     s.html.render()

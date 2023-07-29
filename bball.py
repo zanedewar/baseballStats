@@ -3,7 +3,6 @@ import pybaseball
 import pandas
 import rosters
 from tkinter import ttk
-import statsapi
 #import graphics
 batterIndex = ["WAR", "AB", "H", "HR", "BA", "R", 
                "RBI", "SB", "OBP", "SLG", "OPS", "OPS+"]
@@ -28,9 +27,12 @@ class GUI:
         self.rosterDF = rosters.init()
         
         self.g = tkinter.Tk()
-        #self.g.eval('tk::PlaceWindow . center')
-        self.g.geometry("300x%d" % (self.g.winfo_screenheight() - 150))
+        
+        #Sizes and centers window
+
+        self.g.geometry("429x%d" % (self.g.winfo_screenheight() / 2))
         GUI.center(self.g)
+        
         self.currTeam = 'astros'
         self.roster = rosters.getRoster(self)
         
@@ -52,6 +54,7 @@ class GUI:
         return pybaseball.playerid_lookup(last,first,fuzzy=True).key_bbref
     
     def changeTeam(self, *args):
+        #Gets roster of new team picked from combobox
         self.currTeam = self.teamVar.get()
         self.roster = rosters.getRoster(self)
         
@@ -69,14 +72,30 @@ class GUI:
         self.team['values'] = rosters.baseball
         
         label = ttk.Label(text="Team: ")
-        label.pack(fill=tkinter.Y,padx=5,pady=5)
-        self.team.pack(fill=tkinter.Y)
-        
+        #label.pack(fill=tkinter.Y,padx=5,pady=5)
+        #self.team.pack(side=tkinter.LEFT)
+        label.grid(column=0,row=0)
+        self.team.grid(column=0,row=1)
+
         self.team.bind('<<ComboboxSelected>>', self.changeTeam)
         self.createPlayers()
-        self.player.pack()
+        self.statVar = tkinter.StringVar()
+        self.statVar.set("Season")
+        
+        statsLabel = ttk.Label(text="Stats: ")
+        self.statBox = ttk.Combobox(self.g, textvariable=self.statVar)
+        self.statBox['state'] = 'readonly'
+        self.statBox['values'] = ["Season", "Career"]
+        statsLabel.grid(column=2,row=0)
+        self.statBox.grid(column=2,row=1)
+        self.statBox.bind('<<ComboboxSelected>>', self.changeStats)
+
+        #self.player.pack()
         
     
+    def changeStats(self, *args):
+        self.statSetting2023 = not self.statSetting2023
+        self.changePlayer()
 
     def updateGraphics(self):
         return
@@ -92,8 +111,10 @@ class GUI:
         self.player['values'] = currPlayers
         self.label = ttk.Label(text="Player: ")
         
-        self.label.pack(fill=tkinter.Y, padx=5,pady=5)
-        self.player.pack(fill=tkinter.Y)
+        #self.label.pack(fill=tkinter.Y, padx=5,pady=5)
+        #self.player.pack(side=tkinter.LEFT)
+        self.label.grid(column=1,row=0)
+        self.player.grid(column=1,row=1)
         self.player.bind('<<ComboboxSelected>>', self.changePlayer)
         self.g.update()
     
@@ -107,8 +128,10 @@ class GUI:
         
         currStats = self.stats2023 if self.statSetting2023 else self.statsCareer
         for i, field in enumerate(self.fields.values()):
-            self.labels[i].pack()
-            field.pack(fill=tkinter.Y, padx=5,pady=5)
+            #self.labels[i].pack()
+            #field.pack(fill=tkinter.Y, padx=5,pady=5)
+            self.labels[i].grid(column=0,row=i+2)
+            field.grid(column=1,row=i+2)
             field.insert(tkinter.END, currStats[i])
             field.tag_add("center","1.0",tkinter.END)
             field.config(state=tkinter.DISABLED)
